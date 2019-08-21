@@ -32,6 +32,7 @@ NUM_CLASSES = 90
 
 class Detector:
   def __init__(self, model='ssd-2018'):
+    self._count = 0
     self._model = model
     logger.info('Instantiating the Detector', self._model)
     currentModel = ModelProvider(model)
@@ -64,7 +65,11 @@ class Detector:
       self._detection_classes = self._detection_graph.get_tensor_by_name('detection_classes:0')
       self._num_detections = self._detection_graph.get_tensor_by_name('num_detections:0')
 
+  def count(self):
+    return self._count
+
   def detect(self, np_image):
+        self._count +=1
         try:
           image_np_expanded = np.expand_dims(np_image, axis=0)
           (boxes, scores, classes, num) = self._sess.run(
@@ -78,22 +83,16 @@ class Detector:
               self._image_tensor: image_np_expanded
               })
 
-          logger.info('Detected %d objects', num)
+          logger.debug('Detected %d objects', num)
           for i in range (0, num.astype(int)[0]):
             current_class = self._category_index[np.squeeze(classes).astype(np.int32)[i]]['name']
             current_score = np.squeeze(scores)[i]
             
             logger.info('class %s - score %.2f', current_class, current_score)
             
-            if(current_class == u'person' and current_score >= 0.05 ):
-              logger.info('MAN probability: %.2f', current_score)
-            
-            if(current_class == u'person' and current_score >= 0.05 ):
+            if(current_class == u'person' and current_score >= 0.66 ):
               cv2.imwrite('/Users/lp74/Desktop/face-recognition/unknown_pictures/man.jpg', np_image)
               os.system('/miniconda3/bin/face_recognition ~/Desktop/face-recognition/pictures_of_people_i_know/ ~/Desktop/face-recognition/unknown_pictures/man.jpg')
-            
-            if(current_class == u'dog' and current_score >= 0.05):
-              logger.info('DOG probability: %.2f', current_score)
           
           return (boxes, scores, classes, num)
           
@@ -119,13 +118,39 @@ def resizer(scale_percent):
 def template(jpg): 
   cv2_resized = resizer(100)(jpg)
   (boxes, scores, classes, num) = detector.detect(cv2_resized)
-  box = boxes[0][0]
-  print(box)
+  number_of_boxes = num.astype(int)[0]
   H = cv2_resized.shape[0]
   W = cv2_resized.shape[1]
-  print(W, H)
-  cv2.rectangle(cv2_resized, (int(box[1]*W), int(box[0]*H)), (int(box[3]*W), int(box[2]*H)), (0, 255, 0), 2)
-  cv2.imshow('hoststr', cv2_resized) 
+
+  font                   = cv2.FONT_HERSHEY_SIMPLEX
+  place = (10,10)
+  fontScale              = .40
+  fontColor              = (255,255,255)
+  lineType               = 1
+
+
+
+  for i in range(0, number_of_boxes):
+    current_class = detector._category_index[np.squeeze(classes).astype(np.int32)[i]]['name']
+    current_score = np.squeeze(scores)[i]
+    box = boxes[0][i]
+    p1 = (int(box[1]*W), int(box[0]*H))
+    p2 = (int(box[3]*W), int(box[2]*H))
+    if current_score > 0.50:
+      cv2.rectangle(cv2_resized, p1, (p1[0]+60, p1[1]-10), (0, 255, 0), -1)
+      cv2.rectangle(cv2_resized, p1, p2, (0, 255, 0), 1)
+      copy = cv2_resized.copy()
+      cv2.rectangle(copy, p1, p2, (0, 255, 0), -1)
+      cv2.addWeighted(cv2_resized, 0.7, copy, 0.3, 0, cv2_resized)
+      # cv2.rectangle(cv2_resized, (160,90), (320,180), (255, 0, 0), 2)
+      cv2.putText(cv2_resized, current_class, 
+        (p1[0]+2, p1[1]-2), 
+        font, 
+        fontScale,
+        fontColor,
+        lineType)
+  
+  cv2.imshow('detection ', cv2_resized) 
   if cv2.waitKey(1) == 27:
       exit(0) 
 

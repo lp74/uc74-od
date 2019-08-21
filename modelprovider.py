@@ -7,11 +7,11 @@ class ModelProvider:
   DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
 
   modelNames = {
-    'ssd-2017': 'ssd_mobilenet_v1_coco_2017_11_17', 
-    'ssd-2018': 'ssd_mobilenet_v1_coco_2018_01_28',
-    'ssd-mobilenet' : 'ssd_mobilenet_v1_0.75_depth_300x300_coco14_sync_2018_07_03',
-    'ssd-mobilnet-v2-coco': 'ssd_mobilenet_v2_coco_2018_03_29'
-
+    'ssd_mobilenet_v1_coco': 'ssd_mobilenet_v1_coco_2018_01_28',                        #
+    'ssd-mobilenet' : 'ssd_mobilenet_v1_0.75_depth_300x300_coco14_sync_2018_07_03',     #
+    'ssd-mobilnet-v2-coco': 'ssd_mobilenet_v2_coco_2018_03_29',                         # rate: * * * * o
+    'faster_rcnn_inception_v2_coco': 'faster_rcnn_inception_v2_coco_2018_01_28',        # 
+    'faster_rcnn_resnet50_coco': 'faster_rcnn_resnet50_coco_2018_01_28'                 #
     }
 
   def __init__(self, key):

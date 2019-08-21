@@ -1,5 +1,6 @@
 *.pyc
 .env
 .vscode
-ssd_*
+faster_*
 settings.json
+ssd_*
