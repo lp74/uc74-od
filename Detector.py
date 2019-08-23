@@ -137,14 +137,19 @@ def template(jpg):
     p1 = (int(box[1]*W), int(box[0]*H))
     p2 = (int(box[3]*W), int(box[2]*H))
     if current_score > 0.50:
-      cv2.rectangle(cv2_resized, p1, (p1[0]+60, p1[1]-10), (0, 255, 0), -1)
+      if box[0]*H > 10:
+        cv2.rectangle(cv2_resized, p1, (p1[0]+60, p1[1]-10), (0, 255, 0), -1)
+        pt = (p1[0]+2, p1[1]-2)
+      else:
+        cv2.rectangle(cv2_resized, (p1[0], p2[1]), (p1[0]+60, p2[1]+10), (0, 255, 0), -1)
+        pt = (p1[0]+2, p2[1]+8)
       cv2.rectangle(cv2_resized, p1, p2, (0, 255, 0), 1)
       copy = cv2_resized.copy()
       cv2.rectangle(copy, p1, p2, (0, 255, 0), -1)
       cv2.addWeighted(cv2_resized, 0.7, copy, 0.3, 0, cv2_resized)
       # cv2.rectangle(cv2_resized, (160,90), (320,180), (255, 0, 0), 2)
       cv2.putText(cv2_resized, current_class, 
-        (p1[0]+2, p1[1]-2), 
+        pt, 
         font, 
         fontScale,
         fontColor,
